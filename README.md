@@ -1,5 +1,7 @@
 # fastls-lab
 
+[English documentation](https://fasttls.github.io/en/ecosystem/fastls-lab)
+
 独立的 Fastls 请求指纹靶场。当前为首批诊断实现，**不表示全部规划能力已完成**。
 
 已实现：TCP/TLS1.2/1.3、独立H2端口的首个请求SETTINGS/窗口/优先级/HPACK头序、按连接编号的 ClientHello 套件/扩展原始序列及实际协商、每连接首个 HTTP1 请求头的顺序/大小写/重复项、WS/WSS 的 HTTP1 Upgrade、未压缩消息回显、分片/控制帧/关闭与部分负向检查。采集器不导入 Fastls、ftransport 或 uTLS；HTTP2 HPACK 解码使用固定版本 x/net，独立于 Fastls 编译器。
@@ -19,7 +21,7 @@ go run . -output ../reports/lab-run-001
 
 数据面 `/inspect`、`/ws`，管理面 `/health`、`/capabilities`、`/events`。`events.jsonl` 保存握手、头序列与 WS 帧元信息，不保存帧正文、Cookie/Authorization 或 key_share/PSK 的原始密钥材料。原始 TLS 扩展载荷仍可能包含主机名，分享前检查。CLI 退出保留证据。
 
-当前限制：首个头捕获最多64KiB、ClientHello捕获128KiB、WS每帧/消息1MiB、会话15秒/256帧，每次运行最多10000条事件/64MiB证据，达到上限写入 capture.incomplete 并使健康检查失败。仅用于受控测试；不能将缺失/截断观测计为匹配。规划和后续验收见外层 FASTLS_FINGERPRINT_LAB.md。
+当前限制：首个头捕获最多64KiB、ClientHello捕获128KiB、WS每帧/消息1MiB、会话15秒/256帧，每次运行最多10000条事件/64MiB证据，达到上限写入 capture.incomplete 并使健康检查失败。仅用于受控测试；不能将缺失/截断观测计为匹配。本仓库的功能边界以 `/capabilities` 和本文为准；后续变更应附对应测试与脱敏证据，不依赖本地工作区外的规划文件。
 
 
 H2 接收端仅处理每连接首个请求，限制为256帧/64KiB帧或头块/10秒，不作为生产HTTP2服务器。记录 SETTINGS 原始顺序、WINDOW_UPDATE、PRIORITY、HEADERS 优先级和解码后的有序重复头，敏感头脱敏，不保存HPACK块原文。标准库HTTP2客户端校准测试与固定字节帧测试分别验证采集器与后端，不能用Fastls自身生成结果替代参考。
